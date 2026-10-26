@@ -95,7 +95,7 @@ echo "=================================================="
 echo
 echo "接下来在 LuCI 里做两件事："
 echo "  1) 服务 → OpenClash → 全局设置："
-echo "     - 运行模式：Redir-Host（兼容）"
+echo "     - 运行模式：Fake-IP（推荐，也是 OpenClash 默认）"
 echo "     - 旁路由兼容模式：勾选"
 echo "     - DNS：保持默认（本地 DNS 劫持 7874）"
 echo "  2) 服务 → OpenClash → 配置文件订阅："

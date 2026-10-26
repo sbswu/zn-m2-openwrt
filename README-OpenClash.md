@@ -14,7 +14,7 @@
 | `scripts/zn-m2/diy-part2.sh` | 从 `ipq60xx` 镜像定义里删掉 `kmod-usb3`/`kmod-usb-phy-msm`（不要 USB），并检查 OpenClash feed 是否拉取成功 |
 | `scripts/zn-m2/diy-part3.sh` | 默认 LAN 改 `192.168.10.1`；**把 mihomo(Meta) arm64 内核预先塞进 `/etc/openclash/core/clash_meta`**，顺带塞 `Country.mmdb` |
 | `files/root/bypass-setup.sh` | 旁路由一键配置脚本（SSH 里 `sh /root/bypass-setup.sh`） |
-| `files/etc/uci-defaults/90-openclash-bypass` | 首次启动自动把 OpenClash 设成 `Redir-Host + 旁路由兼容模式` |
+| `files/etc/uci-defaults/90-openclash-bypass` | 首次启动自动把 OpenClash 设成 `Fake-IP + 旁路由兼容模式` |
 | `.github/workflows/zn-m2.yml` | 编译前后各加一道校验：`.config` 里缺任何依赖、镜像里没有 `luci-app-openclash`，直接红叉报错，**不会给你一个"看起来成功其实没插件"的固件** |
 
 ### 三个关键点（这是别人抄作业最容易翻车的地方）
@@ -112,7 +112,7 @@ sh /root/bypass-setup.sh
 
 LuCI → **服务 → OpenClash**：
 
-1. **全局设置 → 运行模式**：`Redir-Host（兼容）`（镜像里已经预置好了）
+1. **全局设置 → 运行模式**：`Fake-IP`（镜像里已经预置好了，这也是 OpenClash 官方默认值）
 2. **全局设置 → 旁路由兼容模式**：勾选（也已预置）
 3. **配置文件订阅** → 添加订阅链接 → 保存 → 点「更新」
 4. 回首页 → **启用**，等 30 秒左右状态变成「运行中」
@@ -122,7 +122,7 @@ LuCI → **服务 → OpenClash**：
 
 ```sh
 # 1. 内核在不在、能不能跑
-/etc/openclash/clash -v
+/etc/openclash/core/clash_meta -v
 
 # 2. 进程在不在
 pidof clash
@@ -132,6 +132,13 @@ iptables -t nat -L -n | grep -i clash
 ```
 
 DNS 建议：客户端只用旁路由做 DNS（方案 A/B 都已经保证）。如果你在主路由上还配了别的 DNS（比如运营商 DNS、DoH），`GEOIP,CN` 相关规则会不准。
+
+### Fake-IP 的两个正常现象（别当故障）
+
+- `ping 域名` 会显示 `198.18.0.x` 且不通 —— ICMP 不经过 clash，这是正常的。用 `curl -I https://www.google.com` 验证。
+- 客户端刚连上时前几个请求偶尔慢一下 —— 在等 clash 后台补解析真实 IP，之后就稳定了。
+
+这两种情况下，如果你确实希望某个设备或域名拿到真实 IP，可以把设备 IP 加进「访问控制 → 不走代理的 IP」，或在「全局设置 → DNS → Fake-IP-Filter」里加域名。
 
 ---
 

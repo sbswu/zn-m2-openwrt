@@ -5,8 +5,16 @@
 #
 uci -q get openclash.config >/dev/null 2>&1 || exit 0
 
-# 运行模式：Redir-Host（兼容）——旁路由/二级路由下兼容性最好
-uci -q set openclash.config.en_mode='redir-host'
+# 运行模式：Fake-IP —— OpenClash 官方默认值。
+# 客户端拿到 198.18.0.x 假地址，clash 靠映射表拿回完整域名，
+# 规则按域名精确匹配、首包不用等 DNS 解析、防污染更好。
+# 前提：客户端网关必须指向本机（旁路由场景已满足）。
+uci -q set openclash.config.en_mode='fake-ip'
+uci -q set openclash.config.operation_mode='fake-ip'
+# 让 dnsmasq 的 DNS 转发到 OpenClash，Fake-IP 才能接管解析
+uci -q set openclash.config.enable_redirect_dns='1'
+# Fake-IP 映射不落盘（省 NAND 写入），重启后客户端重新解析即可
+uci -q set openclash.config.store_fakeip='0'
 # 局域网客户端模式
 uci -q set openclash.config.lan_ac_mode='0'
 # 旁路由兼容模式（解决主路由在旁路由上游时部分设备不通的问题）
