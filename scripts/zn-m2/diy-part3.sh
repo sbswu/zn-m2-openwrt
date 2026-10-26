@@ -9,6 +9,20 @@ CORE_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta
 CORE_URL_MIRROR="https://cdn.jsdelivr.net/gh/vernesong/OpenClash@core/master/meta/clash-linux-arm64.tar.gz"
 MMDB_URL="https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb"
 
+echo "==> [diy3] 强制使用 OpenClash feed 的 v0.46.137"
+# install -a 之后仍可能残留 luci feed 的 0.45.152（索引/软链），这里直接以
+# feeds/openclash 的源码覆盖为本地包，保证最终编进去的只有 0.46.137。
+OC_SRC="feeds/openclash/luci-app-openclash"
+[ -f "$OC_SRC/Makefile" ] || { echo "!! 找不到 $OC_SRC"; exit 1; }
+rm -rf package/feeds/luci/luci-app-openclash \
+       package/feeds/openclash/luci-app-openclash \
+       package/luci-app-openclash
+cp -r "$OC_SRC" package/luci-app-openclash
+OC_VER="$(sed -n 's/^PKG_VERSION:=//p' package/luci-app-openclash/Makefile | head -n1)"
+OC_REL="$(sed -n 's/^PKG_RELEASE:=//p' package/luci-app-openclash/Makefile | head -n1)"
+echo "    版本: $OC_VER${OC_REL:+-$OC_REL}"
+[ "$OC_VER" = "0.46.137" ] || { echo "!! 版本不是 0.46.137"; exit 1; }
+
 echo "==> [diy3] 默认 LAN 地址改为 192.168.10.1"
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
 
