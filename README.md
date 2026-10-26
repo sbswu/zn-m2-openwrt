@@ -14,8 +14,8 @@
 ## 插件
 
 - [gecoosac](https://github.com/lwb1978/openwrt-gecoosac)(已集成)
+- [OpenClash](https://github.com/vernesong/OpenClash/releases/tag/v0.46.137)(**本仓库已内置**：含 ruby 依赖 + aarch64 meta 内核，刷完直接能用，旁路由配置见 [README-OpenClash.md](./README-OpenClash.md))
 - [luci-theme-argon](https://github.com/jerrykuku/luci-theme-argon/releases/tag/v1.8.4)(推荐安装)
-- [OpenClash](https://github.com/vernesong/OpenClash/releases/tag/v0.46.137)(推荐安装)
 
 ## 重刷固件/救砖
 
