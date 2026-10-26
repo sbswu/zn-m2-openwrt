@@ -9,6 +9,18 @@ CORE_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta
 CORE_URL_MIRROR="https://cdn.jsdelivr.net/gh/vernesong/OpenClash@core/master/meta/clash-linux-arm64.tar.gz"
 MMDB_URL="https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb"
 
+echo "==> [diy3] 修正 uci-defaults 脚本执行权限"
+# Windows 上 git 常把新文件存成 644，而 OpenWrt 只执行带 x 位的
+# /etc/uci-defaults/*，权限丢了等于这些默认值全部不生效（旁路由兼容模式
+# 官方默认是 0，丢了就起不来）。
+if [ -d files/etc/uci-defaults ]; then
+	chmod 0755 files/etc/uci-defaults/* 2>/dev/null || true
+	for f in files/etc/uci-defaults/*; do
+		[ -x "$f" ] || { echo "!! $f 不可执行"; exit 1; }
+		echo "    $(ls -l "$f" | awk '{print $1, $NF}')"
+	done
+fi
+
 echo "==> [diy3] 强制使用 OpenClash feed 的 v0.46.137"
 # install -a 之后仍可能残留 luci feed 的 0.45.152（索引/软链），这里直接以
 # feeds/openclash 的源码覆盖为本地包，保证最终编进去的只有 0.46.137。
