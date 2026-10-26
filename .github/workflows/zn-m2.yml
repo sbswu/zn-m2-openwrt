@@ -119,6 +119,42 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
+    - name: Verify OpenClash config
+      run: |
+        cd openwrt
+        fail=0
+        echo "---- .config 关键项检查 ----"
+        for k in \
+          CONFIG_PACKAGE_luci-app-openclash \
+          CONFIG_PACKAGE_ruby \
+          CONFIG_PACKAGE_ruby-yaml \
+          CONFIG_PACKAGE_unzip \
+          CONFIG_PACKAGE_ca-bundle \
+          CONFIG_PACKAGE_kmod-tun \
+          CONFIG_PACKAGE_kmod-ipt-nat \
+          CONFIG_PACKAGE_iptables-mod-tproxy \
+          CONFIG_PACKAGE_iptables-mod-extra \
+          CONFIG_PACKAGE_ipset \
+          CONFIG_PACKAGE_dnsmasq_full_ipset \
+          CONFIG_PACKAGE_dnsmasq-full \
+          CONFIG_PACKAGE_luci-compat
+        do
+          if grep -q "^$k=y" .config; then
+            echo "OK   $k"
+          else
+            echo "MISS $k"
+            fail=1
+          fi
+        done
+        echo "---- 预置内核检查 ----"
+        ls -l files/etc/openclash/core/clash_meta || fail=1
+        echo "---- 确认已去掉 USB 包 ----"
+        grep -q '^CONFIG_PACKAGE_kmod-usb3=y' .config && { echo "MISS kmod-usb3 仍在配置里"; fail=1; } || echo "OK   USB 包已剔除"
+        if [ $fail -ne 0 ]; then
+          echo "::error::OpenClash 依赖未就绪，终止编译，避免编出一个没有 OpenClash 的固件"
+          exit 1
+        fi
+
     - name: Compile the firmware
       id: compile
       run: |
@@ -145,6 +181,10 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
+        echo "---- 固件内 OpenClash 校验 ----"
+        grep -q '^luci-app-openclash ' *.manifest || { echo "::error::固件里没有 luci-app-openclash"; exit 1; }
+        grep '^luci-app-openclash ' *.manifest
+        grep '^kmod-tun ' *.manifest || true
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 

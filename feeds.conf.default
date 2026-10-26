@@ -3,3 +3,5 @@ src-git luci https://github.com/openwrt-fork/sdf8057-luci.git;2023
 src-git routing https://github.com/openwrt/routing.git;openwrt-21.02
 src-git telephony https://github.com/openwrt/telephony.git;openwrt-21.02
 src-git gecoosac https://github.com/lwb1978/openwrt-gecoosac.git;main
+# OpenClash 固定到 v0.46.137（作者 README 推荐的稳定版，Lua 版 LuCI 兼容性最好）
+src-git openclash https://github.com/vernesong/OpenClash.git;v0.46.137

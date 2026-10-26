@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# 首次启动自动写入 OpenClash 的旁路由友好默认值
+# （只改 openclash 自己的 uci，不动网络，安全）
+#
+uci -q get openclash.config >/dev/null 2>&1 || exit 0
+
+# 运行模式：Redir-Host（兼容）——旁路由/二级路由下兼容性最好
+uci -q set openclash.config.en_mode='redir-host'
+# 局域网客户端模式
+uci -q set openclash.config.lan_ac_mode='0'
+# 旁路由兼容模式（解决主路由在旁路由上游时部分设备不通的问题）
+uci -q set openclash.config.bypass_gateway_compatible='1'
+# 路由自身流量也走代理（方便订阅更新、在线升级）
+uci -q set openclash.config.router_self_proxy='1'
+# 允许局域网访问控制面板
+uci -q set openclash.config.intranet_allowed='1'
+
+uci -q commit openclash
+
+exit 0
