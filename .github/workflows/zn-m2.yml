@@ -223,9 +223,6 @@ jobs:
       with:
         delete_workflows: true
         workflows_keep_day: 3
+        delete_releases: false
+        delete_tags: false
         gh_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Delete Tags without Release
-      uses: Huanyueyichen/delete-tags-without-release-action@v0.2.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
